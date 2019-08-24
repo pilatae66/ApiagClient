@@ -56,7 +56,7 @@ export default new Vuex.Store({
   actions: {
     login({commit}, payload){
       axios({
-        url: "http://localhost:8000/api/login",
+        url: "https://mighty-savannah-84780.herokuapp.com/api/login",
         method:"post",
         data:{
           username: payload.username,
@@ -90,7 +90,7 @@ export default new Vuex.Store({
     },
     productInit({commit}){
       axios({
-        url: 'http://localhost:8000/api/products',
+        url: 'https://mighty-savannah-84780.herokuapp.com/api/products',
         method: 'GET'
       })
       .then(res => {
@@ -99,7 +99,7 @@ export default new Vuex.Store({
     },
     productStore({commit}, payload){
       axios({
-        url: 'http://localhost:8000/api/products',
+        url: 'https://mighty-savannah-84780.herokuapp.com/api/products',
         method: 'POST',
         data: {
           type: payload.type,
@@ -116,7 +116,7 @@ export default new Vuex.Store({
     },
     productUpdate({commit}, payload){
       axios({
-        url: `http://localhost:8000/api/products/${payload.id}`,
+        url: `https://mighty-savannah-84780.herokuapp.com/api/products/${payload.id}`,
         method: 'POST',
         data: {
           _method: 'PUT',
@@ -134,7 +134,7 @@ export default new Vuex.Store({
     },
     productDestroy({commit}, payload){
       axios({
-        url: `http://localhost:8000/api/products/${payload.id}`,
+        url: `https://mighty-savannah-84780.herokuapp.com/api/products/${payload.id}`,
         method: 'POST',
         data: {
           _method: 'DELETE'
