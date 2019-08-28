@@ -2,7 +2,7 @@
   <v-data-table
     :headers="headers"
     :items="products"
-    sort-by="calories"
+    sort-by="date_registered"
     class="elevation-1"
   >
     <template v-slot:top>
@@ -27,25 +27,27 @@
               <v-container>
                 <v-row>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="editedItem.type" label="Product Type"></v-text-field>
+                    <v-select
+                      v-model="editedItem.type"
+                      label="Product Type"
+                      :items="typeItems"
+                      :error-messages="error.type"
+                    ></v-select>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="editedItem.brand" label="Product Brand"></v-text-field>
+                    <v-text-field v-model="editedItem.brand" label="Product Brand" :error-messages="error.brand"></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="editedItem.model" label="Product Model"></v-text-field>
+                    <v-text-field v-model="editedItem.model" label="Product Model" :error-messages="error.model"></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="editedItem.color" label="Product Color"></v-text-field>
+                    <v-text-field v-model="editedItem.color" label="Product Color" :error-messages="error.color"></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                     <v-text-field v-model="editedItem.price" label="Product Price"></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                     <v-text-field v-model="editedItem.downpayment" label="Product Downpayment"></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field label="Date Registered"></v-text-field>
                   </v-col>
                 </v-row>
               </v-container>
@@ -54,7 +56,7 @@
             <v-card-actions>
               <v-spacer></v-spacer>
               <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
-              <v-btn color="blue darken-1" text @click="save">Save</v-btn>
+              <v-btn color="blue darken-1" text @click.native="save" :loading="loading">Save</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -86,6 +88,9 @@
   export default {
     data: () => ({
       dialog: false,
+      typeItems: [
+        'REPO', 'NEW'
+      ],
       headers: [
         {
           text: 'Type',
@@ -124,9 +129,11 @@
     }),
 
     computed: {
-      ...mapState([
-        'products'
-      ]),
+      ...mapState({
+        products: state => state.products.products,
+        error: state => state.products.errors,
+        loading: 'loading'
+      }),
       formTitle () {
         return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
       },
@@ -136,12 +143,16 @@
       dialog (val) {
         val || this.close()
       },
+      loading(newValue, oldValue){
+        if (newValue == false) {
+          this.dialog = false
+        }
+      }
     },
 
     created () {
-      this.productInit()
+      this.productInit()      
     },
-
     methods: {
       ...mapActions([
         'productInit',
@@ -151,7 +162,6 @@
       ]),
       editItem (item) {
         this.editedIndex = this.products.indexOf(item)
-        this.editedItem.id = item.id
         this.editedItem = Object.assign({}, item)
         this.dialog = true
       },
@@ -161,7 +171,7 @@
           index: this.products.indexOf(item),
           id: item.id
         }
-        confirm('Are you sure you want to delete this item?') && this.productDestroy(data)
+        this.productDestroy(data)
       },
 
       close () {
@@ -196,9 +206,8 @@
             price: this.editedItem.price,
             downpayment: this.editedItem.downpayment
           }
-          this.productStore(data)
+          console.log(this.productStore(data))
         }
-        this.close()
       },
     },
   }

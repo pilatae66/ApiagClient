@@ -124,6 +124,7 @@
         { title: 'Dashboard', icon: 'mdi-view-dashboard', to:'dashboard' },
         { title: 'Customer', icon: 'mdi-face', to: 'customer' },
         { title: 'Admin', icon: 'perm_identity', to: 'admin' },
+        { title: 'Role', icon: 'perm_identity', to: 'role' },
         { title: 'Products', icon: 'motorcycle', to: 'products' },
       ],
     }),

@@ -34,6 +34,11 @@ export default new Router({
       component: () => import('./views/Admin.vue')
     },
     {
+      path: '/role',
+      name: 'role',
+      component: () => import('./views/Role.vue')
+    },
+    {
       path: '/products',
       name: 'products',
       component: () => import('./views/Product.vue')
