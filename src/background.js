@@ -4,12 +4,14 @@ import {
   app,
   protocol,
   BrowserWindow,
-  Menu
+  Menu,
+  ipcMain
 } from 'electron'
 import {
   createProtocol,
   installVueDevtools
 } from 'vue-cli-plugin-electron-builder/lib'
+import { autoUpdater } from "electron-updater"
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
@@ -100,4 +102,19 @@ if (isDevelopment) {
       app.quit()
     })
   }
+
+  ipcMain.on('app_version', (event) => {
+    event.sender.send('app_version', { version: app.getVersion() });
+  });
+
+  ipcMain.on('restart_app', () => {
+    autoUpdater.quitAndInstall();
+  });
+
+  autoUpdater.on('update-available', () => {
+    win.webContents.send('update_available');
+  });
+  autoUpdater.on('update-downloaded', () => {
+    win.webContents.send('update_downloaded');
+  });
 }

@@ -66,15 +66,26 @@
       </v-container>
     </v-content>
 
+    <div v-if="notification" class="notification">
+      <p>{{ this.message }}</p>
+      <button v-if="close_button" @click="closeNotification()">
+        Close
+      </button>
+      <button v-if="restart_button" @click="restartApp()">
+        Restart
+      </button>
+    </div>
+
     <v-footer
       app
       color="#1f2d54"
       class="white--text"
     >
-      <span>LonerDev</span>
+      <span>{{ this.version }}</span>
       <v-spacer></v-spacer>
-      <span>&copy; 2019</span>
+      <span>LonerDev &copy; 2019</span>
     </v-footer>
+
     <div class="text-center">
     <v-dialog
       v-model="dialog"
@@ -108,8 +119,10 @@
 </template>
 
 <script>
-  import { mapState, mapActions } from "vuex";
-  import Login from "./views/Login";
+  import { mapState, mapActions } from "vuex"
+  import Login from "./views/Login"
+  import { ipcRenderer } from 'electron'
+
   export default {
     components:{ Login },
     props: {
@@ -118,6 +131,11 @@
     data: () => ({
       dialog: false,
       left: false,
+      version: "",
+      notification: false,
+      message: "",
+      close_button: false,
+      restart_button: false,
       items: [
         { title: 'Dashboard', icon: 'mdi-view-dashboard', to:'dashboard' },
         { title: 'Customer', icon: 'mdi-face', to: 'customer' },
@@ -126,6 +144,25 @@
         { title: 'Products', icon: 'motorcycle', to: 'products' },
       ],
     }),
+    created(){
+      ipcRenderer.send('app_version')
+      ipcRenderer.on('app_version', (event, arg) => {
+        ipcRenderer.removeAllListeners('app_version')
+        this.version = 'Version ' + arg.version
+      });
+
+      ipcRenderer.on('update_available', () => {
+        ipcRenderer.removeAllListeners('update_available');
+        this.message = 'A new update is available. Downloading now...';
+        this.notification = true;
+      });
+      ipcRenderer.on('update_downloaded', () => {
+        ipcRenderer.removeAllListeners('update_downloaded');
+        this.message = 'Update Downloaded. It will be installed on restart. Restart now?';
+        this.restart_button = true;
+        this.notification = true;
+      });
+    },
     computed:{
       ...mapState({
         loggedIn: state => state.appState.loggedIn,
@@ -141,6 +178,12 @@
       logout_user(){
         this.drawer = false
         this.logout()
+      },
+      closeNotification() {
+        this.notification = false;
+      },
+      restartApp() {
+        ipcRenderer.send('restart_app');
       }
     },
     watch:{
@@ -152,3 +195,15 @@
     }
   }
 </script>
+<style scoped>
+.notification {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 200px;
+  padding: 20px;
+  border-radius: 5px;
+  background-color: white;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+}
+</style>
