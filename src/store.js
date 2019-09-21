@@ -4,8 +4,7 @@ import Vuex from 'vuex'
 import router from "./router";
 
 Vue.use(Vuex)
-let database_url = 'https://mighty-savannah-84780.herokuapp.com'
-let local_url = 'http://localhost:8000'
+let url = !process.env.IS_TEST ? 'http://localhost:8000' : 'https://mighty-savannah-84780.herokuapp.com'
 
 export default new Vuex.Store({
   state: {
@@ -43,11 +42,16 @@ export default new Vuex.Store({
         name:""
       }
     },
-    loading: false
+    customers:{
+      customers:[],
+    },
+    loading: false,
+    drawer: false
   },
   mutations: {
     LOGIN(state, payload){
       state.appState.loggedIn = true
+      state.drawer = true
       state.user.auth_token = payload.token
       state.user.auth_user = payload.user
       router.push('dashboard')
@@ -58,6 +62,7 @@ export default new Vuex.Store({
     },
     LOGOUT(state){
       state.appState.loggedIn = false,
+      state.drawer = false
       state.user.auth_token = ""
       state.user.auth_user = ""
       router.push('/')
@@ -137,11 +142,29 @@ export default new Vuex.Store({
       state.admins.admins.splice(payload,1)
       Vue.swal('Success!', 'User Deleted Successfully!', 'success')
     },
+    CUSTOMERINIT(state, payload){
+      state.customers.customers = payload.data
+    },
+    CUSTOMERSTORE(state, payload){
+      state.customers.customers.push(payload)
+      state.customers.errors.name = ""
+      Vue.swal('Success!', 'Role Added Successfully!', 'success')
+    },
+    CUSTOMERUPDATE(state, payload){
+      Vue.set(state.customers.customers[payload.index], 'name', payload.name)
+      state.customers.errors.name = ""
+      Vue.swal('Success!', 'Role Updated Successfully!', 'success')
+    },
+    CUSTOMERDESTROY(state, payload){
+      state.customers.customers.splice(payload,1)
+      Vue.swal('Success!', 'Role Deleted Successfully!', 'success')
+    }
   },
   actions: {
-    login({commit}, payload){
+    login({commit, state}, payload){
+      state.loading = true
       axios({
-        url: `${local_url}/api/login`,
+        url: `${url}/api/login`,
         method:"post",
         data:{
           username: payload.username,
@@ -152,8 +175,10 @@ export default new Vuex.Store({
           token: res.data.success.token,
           user: res.data.success.user
         }
+        state.loading = false
         commit('LOGIN', data)
       }).catch(err => {
+        state.loading = false
         console.log(err.response)        
         if (err.response.status == 401) {
           let data = {
@@ -175,7 +200,7 @@ export default new Vuex.Store({
     },
     productInit({commit}){
       axios({
-        url: `${local_url}/api/products`,
+        url: `${url}/api/products`,
         method: 'GET'
       })
       .then(res => {
@@ -185,7 +210,7 @@ export default new Vuex.Store({
     productStore({commit, state}, payload){
       state.loading = true
       axios({
-        url: `${local_url}/api/products`,
+        url: `${url}/api/products`,
         method: 'POST',
         data: {
           type: payload.type,
@@ -208,7 +233,7 @@ export default new Vuex.Store({
     productUpdate({commit, state}, payload){
       state.loading = true
       axios({
-        url: `${local_url}/api/products/${payload.id}`,
+        url: `${url}/api/products/${payload.id}`,
         method: 'POST',
         data: {
           _method: 'PUT',
@@ -233,7 +258,7 @@ export default new Vuex.Store({
         confirmButtonText: 'Yes',
         showLoaderOnConfirm: true,
         preConfirm: () => {
-          return fetch(`${local_url}/api/products/${payload.id}`, {
+          return fetch(`${url}/api/products/${payload.id}`, {
               method: 'DELETE'
             })
             .then(response => {
@@ -256,7 +281,7 @@ export default new Vuex.Store({
     },
     roleInit({commit}){
       axios({
-        url: `${local_url}/api/roles`,
+        url: `${url}/api/roles`,
         method: 'GET'
       })
       .then(res => {
@@ -266,7 +291,7 @@ export default new Vuex.Store({
     roleStore({commit, state}, payload){      
       state.loading = true
       axios({
-        url: `${local_url}/api/roles`,
+        url: `${url}/api/roles`,
         method: 'POST',
         data: {
           name: payload.name,
@@ -284,7 +309,7 @@ export default new Vuex.Store({
     roleUpdate({commit, state}, payload){
       state.loading = true
       axios({
-        url: `${local_url}/api/roles/${payload.id}`,
+        url: `${url}/api/roles/${payload.id}`,
         method: 'POST',
         data: {
           _method: 'PUT',
@@ -304,7 +329,7 @@ export default new Vuex.Store({
         confirmButtonText: 'Yes',
         showLoaderOnConfirm: true,
         preConfirm: () => {
-          return fetch(`${local_url}/api/roles/${payload.id}`, {
+          return fetch(`${url}/api/roles/${payload.id}`, {
             method: 'DELETE'
             })
             .then(response => {
@@ -327,7 +352,7 @@ export default new Vuex.Store({
     },
     adminInit({commit}, payload){
       axios({
-        url: `${local_url}/api/admins`,
+        url: `${url}/api/admins`,
         method: 'GET'
       })
       .then(res => {
@@ -337,7 +362,7 @@ export default new Vuex.Store({
     userStore({commit, state}, payload){
       state.loading = true
       axios({
-        url: `${local_url}/api/users`,
+        url: `${url}/api/users`,
         method: 'POST',
         data: {
           firstname: payload.firstname,
@@ -360,7 +385,7 @@ export default new Vuex.Store({
     userUpdate({commit, state}, payload){      
       state.loading = true
       axios({
-        url: `${local_url}/api/users/${payload.id}`,
+        url: `${url}/api/users/${payload.id}`,
         method: 'POST',
         data: {
           _method: 'PUT',
@@ -391,7 +416,7 @@ export default new Vuex.Store({
         confirmButtonColor:'red',
         showLoaderOnConfirm: true,
         preConfirm: () => {
-          return fetch(`${local_url}/api/users/${payload.id}`, {
+          return fetch(`${url}/api/users/${payload.id}`, {
               method: 'DELETE'
             })
             .then(response => {
@@ -412,5 +437,76 @@ export default new Vuex.Store({
         }
       })
     },
+    customerInit({commit}){
+      axios({
+        url: `${url}/api/customers`,
+        method: 'GET'
+      })
+      .then(res => {
+        commit('CUSTOMERINIT', res.data)
+      })
+    },
+    customerStore({commit, state}, payload){      
+      state.loading = true
+      axios({
+        url: `${url}/api/customers`,
+        method: 'POST',
+        data: {
+          name: payload.name,
+        }
+      })
+      .then(res => {
+        commit('CUSTOMERSTORE', res.data)
+        state.loading = false
+        
+      })
+      .catch(err => {
+        state.loading = false
+      })
+    },
+    customerUpdate({commit, state}, payload){
+      state.loading = true
+      axios({
+        url: `${url}/api/customers/${payload.id}`,
+        method: 'POST',
+        data: {
+          _method: 'PUT',
+          type: payload.name,
+        }
+      })
+      .then(res => {
+        commit('CUSTOMERUPDATE', payload)
+        state.loading = false
+      })
+      .catch(err => state.loading = false)
+    },
+    customerDestroy({commit}, payload){
+      Vue.swal({
+        title: 'Do you really want to delete this customer?',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        showLoaderOnConfirm: true,
+        preConfirm: () => {
+          return fetch(`${url}/api/customers/${payload.id}`, {
+            method: 'DELETE'
+            })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(response.statusText)
+              }
+            })
+            .catch(error => {
+              Swal.showValidationMessage(
+                `Request failed: ${error}`
+              )
+            })
+        },
+        allowOutsideClick: () => !Swal.isLoading()
+      }).then((result) => {
+        if (result.value) {
+          commit('CUSTOMERDESTROY', payload.index)
+        }
+      })
+    }
   }
 })

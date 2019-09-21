@@ -43,5 +43,10 @@ export default new Router({
       name: 'products',
       component: () => import('./views/Product.vue')
     },
+    {
+      path: '/customercreate',
+      name: 'customercreate',
+      component: () => import('./views/CustomerCreate.vue')
+    },
   ]
 })

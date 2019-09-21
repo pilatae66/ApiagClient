@@ -7,14 +7,13 @@
       color="#3474eb"
       dark
     >
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer" v-if="this.loggedIn"></v-app-bar-nav-icon>
       <v-toolbar-title>Transcycle Debtor Locator System</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn depressed v-if="!this.loggedIn" color="blue" @click="dialog = !dialog">Login</v-btn>
     </v-app-bar>
 
     <v-navigation-drawer
-      v-model="drawer"
+      :value="drawer"
       src="https://cdn.vuetifyjs.com/images/backgrounds/bg-2.jpg"
       app
       dark
@@ -25,7 +24,7 @@
         </v-list-item-avatar>
 
         <v-list-item-content>
-          <v-list-item-title>John Leider</v-list-item-title>
+          <v-list-item-title>{{ this.auth_user.full_name }}</v-list-item-title>
         </v-list-item-content>
       </v-list-item>
       <v-divider></v-divider>
@@ -100,7 +99,7 @@
         </v-card-title>
 
         <v-card-text>
-          <Login v-on:login="dialog = false"/>
+          <Login />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -117,7 +116,6 @@
       source: String,
     },
     data: () => ({
-      drawer: false,
       dialog: false,
       left: false,
       items: [
@@ -130,7 +128,10 @@
     }),
     computed:{
       ...mapState({
-        loggedIn: state => state.appState.loggedIn
+        loggedIn: state => state.appState.loggedIn,
+        auth_user: state => state.user.auth_user,
+        loading: state => state.loading,
+        drawer: state => state.drawer
       })
     },
     methods:{
@@ -140,6 +141,13 @@
       logout_user(){
         this.drawer = false
         this.logout()
+      }
+    },
+    watch:{
+      loading(newValue, oldValue){
+        if (newValue == false) {
+          this.dialog = false
+        }
       }
     }
   }
