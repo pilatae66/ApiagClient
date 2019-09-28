@@ -58,12 +58,19 @@
       <v-icon
         small
         class="mr-2"
+      >
+        add
+      </v-icon>
+      <v-icon
+        small
+        class="mr-2"
         @click="editItem(item)"
       >
         edit
       </v-icon>
       <v-icon
         small
+        class="mr-2"
         @click="deleteItem(item)"
       >
         delete
@@ -92,7 +99,7 @@
         { text: 'Mobile Number', value: 'details.mobile_number', width: 500 },
         { text: 'Landline Number', value: 'details.landline_number', width: 500 },
         { text: 'Address', value: 'address.permanent_address', width: 500 },
-        { text: 'Actions', value: 'action', sortable: false }
+        { text: 'Actions', value: 'action', width:200, sortable: false }
       ],
       editedIndex: -1,
       editedItem: {

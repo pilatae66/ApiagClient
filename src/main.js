@@ -12,7 +12,7 @@ Vue.use(VueSweetalert2);
 Vue.use(VueGoogleMaps, {
   load: {
     key: 'AIzaSyDfAlTFshIjpAoa4wV4wCTXS_1WSpqqlu8',
-    libraries: 'places', // This is required if you use the Autocomplete plugin
+    // libraries: 'places', // This is required if you use the Autocomplete plugin
     // OR: libraries: 'places,drawing'
     // OR: libraries: 'places,drawing,visualization'
     // (as you require)

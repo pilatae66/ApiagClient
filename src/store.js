@@ -4,7 +4,7 @@ import Vuex from 'vuex'
 import router from "./router";
 
 Vue.use(Vuex)
-let url = !process.env.IS_TEST ? 'http://localhost:8000' : 'https://mighty-savannah-84780.herokuapp.com'
+let url = process.env.NODE_ENV !== 'production' ? 'http://localhost:8000' : 'https://mighty-savannah-84780.herokuapp.com'
 
 export default new Vuex.Store({
   state: {
@@ -44,6 +44,47 @@ export default new Vuex.Store({
     },
     customers:{
       customers:[],
+      errors:{
+        customer_name:{
+        },
+         customer_details: {
+        },
+        customer_address: {
+        },
+        customer_family: {
+        },
+        customer_employment_details: {
+            self_employed: {
+                business_name: '',
+                nature_of_business: '',
+                address: '',
+                landline_number: '',
+                mobile_number: ''
+            },
+            employed: {
+                type_of_org: "",
+                company_name: "",
+                length_of_stay: "",
+                address: "",
+                landline_number: "",
+                mobile_number: "",
+                nature_of_business: "",
+                position: "",
+                employment_status: "",
+            }
+        },
+        customer_financial_info:{
+            income:[{
+                source_of_income:'',
+                who:'',
+                amount:0
+            }],
+            liability:[{
+                liability:'',
+                amount:0
+            }]
+        }
+      }
     },
     loading: false,
     drawer: false
@@ -148,7 +189,8 @@ export default new Vuex.Store({
     CUSTOMERSTORE(state, payload){
       state.customers.customers.push(payload)
       state.customers.errors.name = ""
-      Vue.swal('Success!', 'Role Added Successfully!', 'success')
+      Vue.swal('Success!', 'Customer Added Successfully!', 'success')
+      router.push({name: 'customer'})
     },
     CUSTOMERUPDATE(state, payload){
       Vue.set(state.customers.customers[payload.index], 'name', payload.name)
@@ -158,6 +200,30 @@ export default new Vuex.Store({
     CUSTOMERDESTROY(state, payload){
       state.customers.customers.splice(payload,1)
       Vue.swal('Success!', 'Role Deleted Successfully!', 'success')
+    },
+    ERROR(state, payload){      
+      state.customers.errors.customer_name.firstname = payload['customer.customer_name.firstname']
+      state.customers.errors.customer_name.middlename = payload['customer.customer_name.middlename']
+      state.customers.errors.customer_name.lastname = payload['customer.customer_name.lastname']
+      state.customers.errors.customer_details.date_of_birth = payload['customer.customer_details.date_of_birth']
+      state.customers.errors.customer_details.civil_status = payload['customer.customer_details.civil_status']
+      state.customers.errors.customer_details.employment_type = payload['customer.customer_details.employment_type']
+      state.customers.errors.customer_details.mobile_number = payload['customer.customer_details.mobile_number']
+      state.customers.errors.customer_details.landline_number = payload['customer.customer_details.landline_number']
+      state.customers.errors.customer_details.place_of_birth = payload['customer.customer_details.place_of_birth']
+      state.customers.errors.customer_details.date_of_birth = payload['customer.customer_details.date_of_birth']
+      state.customers.errors.customer_details.religion = payload['customer.customer_details.religion']
+      state.customers.errors.customer_details.email = payload['customer.customer_details.email']
+      state.customers.errors.customer_details.educational_attainment = payload['customer.customer_details.educational_attainment']
+      state.customers.errors.customer_address.present_address = payload['customer.customer_address.present_address']
+      state.customers.errors.customer_address.permanent_address = payload['customer.customer_address.permanent_address'],
+      state.customers.errors.customer_family.father_name = payload['customer.customer_family.father_name'],
+      state.customers.errors.customer_family.mother_name = payload['customer.customer_family.mother_name'],
+      state.customers.errors.customer_family.spouse_name = payload['customer.customer_family.spouse_name'],
+      state.customers.errors.customer_family.dependent1 = payload['customer.customer_family.dependent1'],
+      state.customers.errors.customer_family.dependent2 = payload['customer.customer_family.dependent2'],
+      state.customers.errors.customer_family.dependent3 = payload['customer.customer_family.dependent3']
+      state.customers.errors.customer_financial_info.income = payload['customer.customer_financial_info.income']
     }
   },
   actions: {
@@ -179,7 +245,7 @@ export default new Vuex.Store({
         commit('LOGIN', data)
       }).catch(err => {
         state.loading = false
-        console.log(err.response)        
+        console.log(err)        
         if (err.response.status == 401) {
           let data = {
             title: 'Error',
@@ -188,12 +254,12 @@ export default new Vuex.Store({
           commit('LOGINERROR', data)
         }
         if (err.response.status == 500) {
-            Vue.swal('Passport Error!', err.response.data.message, 'error')
+          Vue.swal('Passport Error!', err.response.data.message, 'error')
         }
         if (err.errno == 'ECONNREFUSED') {
-            commit('LOGINERROR', 'Error!', 'Conection to server failed!')
+          commit('LOGINERROR', 'Error!', 'Conection to server failed!')
         }
-        })
+      })
     },
     logout({commit}){
       commit('LOGOUT')
@@ -452,16 +518,16 @@ export default new Vuex.Store({
         url: `${url}/api/customers`,
         method: 'POST',
         data: {
-          name: payload.name,
+          customer: payload,
         }
       })
-      .then(res => {
+      .then(res => {        
         commit('CUSTOMERSTORE', res.data)
         state.loading = false
-        
       })
       .catch(err => {
         state.loading = false
+        commit('ERROR', err.response.data.errors)
       })
     },
     customerUpdate({commit, state}, payload){

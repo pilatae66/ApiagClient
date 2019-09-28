@@ -89,6 +89,8 @@ app.on('ready', async () => {
   createWindow()
 })
 
+autoUpdater.checkForUpdatesAndNotify();
+
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
   if (process.platform === 'win32') {
@@ -102,19 +104,19 @@ if (isDevelopment) {
       app.quit()
     })
   }
-
-  ipcMain.on('app_version', (event) => {
-    event.sender.send('app_version', { version: app.getVersion() });
-  });
-
-  ipcMain.on('restart_app', () => {
-    autoUpdater.quitAndInstall();
-  });
-
-  autoUpdater.on('update-available', () => {
-    win.webContents.send('update_available');
-  });
-  autoUpdater.on('update-downloaded', () => {
-    win.webContents.send('update_downloaded');
-  });
 }
+
+ipcMain.on('app_version', (event) => {
+  event.sender.send('app_version', { version: app.getVersion() });
+});
+
+ipcMain.on('restart_app', () => {
+  autoUpdater.quitAndInstall();
+});
+
+autoUpdater.on('update-available', () => {
+  win.webContents.send('update_available');
+});
+autoUpdater.on('update-downloaded', () => {
+  win.webContents.send('update_downloaded');
+});

@@ -68,12 +68,12 @@
 
     <div v-if="notification" class="notification">
       <p>{{ this.message }}</p>
-      <button v-if="close_button" @click="closeNotification()">
+      <v-btn v-if="close_button" @click="closeNotification()">
         Close
-      </button>
-      <button v-if="restart_button" @click="restartApp()">
+      </v-btn>
+      <v-btn v-if="restart_button" @click="restartApp()">
         Restart
-      </button>
+      </v-btn>
     </div>
 
     <v-footer
@@ -198,6 +198,7 @@
 <style scoped>
 .notification {
   position: fixed;
+  margin-bottom: 10px;
   bottom: 20px;
   left: 20px;
   width: 200px;
