@@ -11,6 +11,20 @@ export default new Vuex.Store({
     appState:{
       loggedIn:false
     },
+    adminItems:[
+      { title: 'Dashboard', icon: 'mdi-view-dashboard', to:'dashboard' },
+      { title: 'Customer', icon: 'mdi-face', to: 'customer' },
+      { title: 'Admin', icon: 'perm_identity', to: 'admin' },
+      { title: 'Role', icon: 'perm_identity', to: 'role' },
+      { title: 'Products', icon: 'motorcycle', to: 'products' },
+    ],
+    agentItems:[
+      { title: 'Dashboard', icon: 'mdi-view-dashboard', to:'dashboard' },
+      { title: 'Customer', icon: 'mdi-face', to: 'customer' },
+    ],
+    cashierItems:[
+      { title: 'Dashboard', icon: 'mdi-view-dashboard', to:'dashboard' },
+    ],
     admins:{
       admins:[],
       errors:{
@@ -195,11 +209,27 @@ export default new Vuex.Store({
     CUSTOMERUPDATE(state, payload){
       Vue.set(state.customers.customers[payload.index], 'name', payload.name)
       state.customers.errors.name = ""
-      Vue.swal('Success!', 'Role Updated Successfully!', 'success')
+      Vue.swal('Success!', 'Customer Updated Successfully!', 'success')
     },
     CUSTOMERDESTROY(state, payload){
       state.customers.customers.splice(payload,1)
-      Vue.swal('Success!', 'Role Deleted Successfully!', 'success')
+      Vue.swal('Success!', 'Customer Deleted Successfully!', 'success')
+    },
+    PURCHASEINIT(state, payload){
+      state.customers.customers = payload.data
+    },
+    PURCHASESTORE(state, payload){
+      Vue.swal('Success!', 'Product Purchased Successfully!', 'success')
+      router.push({name: 'customer'})
+    },
+    PURCHASEUPDATE(state, payload){
+      Vue.set(state.customers.customers[payload.index], 'name', payload.name)
+      state.customers.errors.name = ""
+      Vue.swal('Success!', 'Purchase Updated Successfully!', 'success')
+    },
+    PURCHASEDESTROY(state, payload){
+      state.customers.customers.splice(payload,1)
+      Vue.swal('Success!', 'Purchase Deleted Successfully!', 'success')
     },
     ERROR(state, payload){      
       state.customers.errors.customer_name.firstname = payload['customer.customer_name.firstname']
@@ -571,6 +601,75 @@ export default new Vuex.Store({
       }).then((result) => {
         if (result.value) {
           commit('CUSTOMERDESTROY', payload.index)
+        }
+      })
+    },
+    purchasedProductsInit({commit}){
+      axios({
+        url: `${url}/api/purchased_products`,
+        method: 'GET'
+      })
+      .then(res => {
+        commit('PURCHASEINIT', res.data)
+      })
+    },
+    purchasedProductsStore({commit, state}, payload){      
+      state.loading = true
+      axios({
+        url: `${url}/api/purchased_products`,
+        method: 'POST',
+        data: payload
+      })
+      .then(res => {        
+        commit('PURCHASESTORE', res.data)
+        state.loading = false
+      })
+      .catch(err => {
+        state.loading = false
+        commit('ERROR', err.response.data.errors)
+      })
+    },
+    purchasedProductsUpdate({commit, state}, payload){
+      state.loading = true
+      axios({
+        url: `${url}/api/purchased_products/${payload.id}`,
+        method: 'POST',
+        data: {
+          _method: 'PUT',
+          type: payload.name,
+        }
+      })
+      .then(res => {
+        commit('PURCHASEUPDATE', payload)
+        state.loading = false
+      })
+      .catch(err => state.loading = false)
+    },
+    purchasedProductsDestroy({commit}, payload){
+      Vue.swal({
+        title: 'Do you really want to delete this Purchased Product?',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        showLoaderOnConfirm: true,
+        preConfirm: () => {
+          return fetch(`${url}/api/purchased_products/${payload.id}`, {
+            method: 'DELETE'
+            })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(response.statusText)
+              }
+            })
+            .catch(error => {
+              Swal.showValidationMessage(
+                `Request failed: ${error}`
+              )
+            })
+        },
+        allowOutsideClick: () => !Swal.isLoading()
+      }).then((result) => {
+        if (result.value) {
+          commit('PURCHASEDESTROY', payload.index)
         }
       })
     }

@@ -42,7 +42,7 @@
         <v-list-item-content>
           <v-list-item-title>{{ item.title }}</v-list-item-title>
         </v-list-item-content>
-        </v-list-item>
+      </v-list-item>
         <template v-slot:append>
         <div class="pa-2">
           <v-btn block @click="logout_user">Logout</v-btn>
@@ -136,13 +136,7 @@
       message: "",
       close_button: false,
       restart_button: false,
-      items: [
-        { title: 'Dashboard', icon: 'mdi-view-dashboard', to:'dashboard' },
-        { title: 'Customer', icon: 'mdi-face', to: 'customer' },
-        { title: 'Admin', icon: 'perm_identity', to: 'admin' },
-        { title: 'Role', icon: 'perm_identity', to: 'role' },
-        { title: 'Products', icon: 'motorcycle', to: 'products' },
-      ],
+      items: [],
     }),
     created(){
       ipcRenderer.send('app_version')
@@ -162,13 +156,17 @@
         this.restart_button = true;
         this.notification = true;
       });
+      if(this.loggedIn == false) this.$router.push('/')
     },
     computed:{
       ...mapState({
         loggedIn: state => state.appState.loggedIn,
         auth_user: state => state.user.auth_user,
         loading: state => state.loading,
-        drawer: state => state.drawer
+        drawer: state => state.drawer,
+        adminItems: 'adminItems',
+        agentItems: 'agentItems',
+        cashierItems: 'cashierItems'
       })
     },
     methods:{
@@ -178,6 +176,7 @@
       logout_user(){
         this.drawer = false
         this.logout()
+        this.items = []
       },
       closeNotification() {
         this.notification = false;
@@ -191,6 +190,24 @@
         if (newValue == false) {
           this.dialog = false
         }
+      },
+      auth_user(newValue, oldValue){
+        switch (newValue.role) {
+          case 'Admin':
+            this.items = this.adminItems
+            break;
+        
+          case 'Agent':
+            this.items = this.agentItems
+            break;
+        
+          case 'Cashier':
+            this.items = this.cashierItems
+            break;
+        
+          default:
+            break;
+        }
       }
     }
   }
@@ -198,7 +215,7 @@
 <style scoped>
 .notification {
   position: fixed;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
   bottom: 20px;
   left: 20px;
   width: 200px;

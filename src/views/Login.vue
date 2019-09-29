@@ -84,6 +84,11 @@
         this.password = ''
         this.$validator.reset()
       },
+    },
+    watch:{
+      loading(newValue, oldValue){
+        if (newValue == false) this.clear()
+      }
     }
   }
 </script>

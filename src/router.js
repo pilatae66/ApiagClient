@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
+import Purchase from './views/Purchase.vue'
 
 Vue.use(Router)
 
@@ -47,6 +48,11 @@ export default new Router({
       path: '/customercreate',
       name: 'customercreate',
       component: () => import('./views/CustomerCreate.vue')
+    },
+    {
+      path: '/purchase/:id',
+      name: 'purchase',
+      component: Purchase
     },
   ]
 })

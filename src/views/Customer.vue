@@ -58,6 +58,7 @@
       <v-icon
         small
         class="mr-2"
+        @click="addPurchase(item)"
       >
         add
       </v-icon>
@@ -84,6 +85,7 @@
 
 <script>
   import { mapState, mapActions } from "vuex";
+  import router from '../router'
   export default {
     data: () => ({
       dialog: false,
@@ -160,7 +162,9 @@
         this.editedItem.role_id = parseInt(this.editedItem.role_id)
         this.dialog = true              
       },
-
+      addPurchase(item){
+        router.push({ path: `/purchase/${item.id}` })
+      },
       deleteItem (item) {
         let data = {
           index: this.customers.indexOf(item),
