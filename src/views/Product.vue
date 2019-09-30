@@ -40,13 +40,16 @@
                   <v-col cols="12" sm="6" md="4">
                     <v-text-field v-model="editedItem.model" label="Product Model" :error-messages="error.model"></v-text-field>
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col cols="12" sm="6" md="6">
                     <v-text-field v-model="editedItem.color" label="Product Color" :error-messages="error.color"></v-text-field>
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col cols="12" sm="6" md="6">
                     <v-text-field v-model="editedItem.price" label="Product Price"></v-text-field>
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col cols="12" sm="6" md="6">
+                    <v-text-field v-model="editedItem.quantity" label="Product Quantity"></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="6">
                     <v-text-field v-model="editedItem.downpayment" label="Product Downpayment"></v-text-field>
                   </v-col>
                 </v-row>
@@ -103,6 +106,7 @@
         { text: 'Model', value: 'model', width: 170 },
         { text: 'Color', value: 'color', width: 170 },
         { text: 'Price', value: 'price', width: 170 },
+        { text: 'Quantity', value: 'quantity', width: 170 },
         { text: 'Downpayment', value: 'downpayment', width: 170 },
         { text: 'Date Registered', value: 'date_registered', width: 170 },
         { text: 'Actions', value: 'action', sortable: false }
@@ -114,8 +118,9 @@
         brand: '',
         model: '',
         color: '',
-        price: 0,
-        downpayment: 0,
+        price: '',
+        quantity: '',
+        downpayment: '',
       },
       defaultItem: {
         id: '',
@@ -123,8 +128,9 @@
         brand: '',
         model: '',
         color: '',
-        price: 0,
-        downpayment: 0,
+        price: '',
+        quantity: '',
+        downpayment: '',
       },
     }),
 

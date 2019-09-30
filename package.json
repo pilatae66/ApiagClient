@@ -44,7 +44,7 @@
     "vuetify-loader": "^1.2.2"
   },
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/pilatae66/ApiagClient.git"
+    "type": "git",
+    "url": "https://github.com/pilatae66/ApiagClient.git"
   }
 }

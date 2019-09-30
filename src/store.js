@@ -101,7 +101,8 @@ export default new Vuex.Store({
       }
     },
     loading: false,
-    drawer: false
+    drawer: false,
+    purchased_product:{}
   },
   mutations: {
     LOGIN(state, payload){
@@ -220,7 +221,7 @@ export default new Vuex.Store({
     },
     PURCHASESTORE(state, payload){
       Vue.swal('Success!', 'Product Purchased Successfully!', 'success')
-      router.push({name: 'customer'})
+      router.push({path: `/checkpurchase/${payload.id}`})
     },
     PURCHASEUPDATE(state, payload){
       Vue.set(state.customers.customers[payload.index], 'name', payload.name)
@@ -230,6 +231,10 @@ export default new Vuex.Store({
     PURCHASEDESTROY(state, payload){
       state.customers.customers.splice(payload,1)
       Vue.swal('Success!', 'Purchase Deleted Successfully!', 'success')
+    },
+    GETPURCHASE(state, payload){
+      state.purchased_product = payload
+      router.push({ path: `/checkpurchase/${payload.id}` })
     },
     ERROR(state, payload){      
       state.customers.errors.customer_name.firstname = payload['customer.customer_name.firstname']
@@ -672,6 +677,9 @@ export default new Vuex.Store({
           commit('PURCHASEDESTROY', payload.index)
         }
       })
+    },
+    getPurchaseDetails({commit}, payload){
+      commit('GETPURCHASE', payload)
     }
   }
 })
