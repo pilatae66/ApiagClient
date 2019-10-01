@@ -139,18 +139,16 @@
       dialog (val) {
         val || this.close()
       },
+      loading(newValue){
+        if (newValue == false) {
+          this.dialog = false
+        }
+      }
     },
 
     created () {
       this.adminInit() 
       this.roleInit()     
-    },
-    watch: {
-      loading(newValue, oldValue){
-        if (newValue == false) {
-          this.dialog = false
-        }
-      }
     },
     methods: {
       ...mapActions([

@@ -137,17 +137,15 @@
       dialog (val) {
         val || this.close()
       },
-    },
-
-    created () {
-      this.customerInit()  
-    },
-    watch: {
-      loading(newValue, oldValue){
+      loading(newValue){
         if (newValue == false) {
           this.dialog = false
         }
       }
+    },
+
+    created () {
+      this.customerInit()  
     },
     methods: {
       ...mapActions([

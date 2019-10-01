@@ -156,7 +156,8 @@
         this.restart_button = true;
         this.notification = true;
       });
-      if(this.loggedIn == false) this.$router.push('/')
+      if(this.loggedIn == false && this.$router.history.current.path != '/') this.$router.push('/')
+      this.checkAppStatus()
     },
     computed:{
       ...mapState({
@@ -171,7 +172,8 @@
     },
     methods:{
       ...mapActions([
-        'logout'
+        'logout',
+        'checkAppStatus'
       ]),
       logout_user(){
         this.drawer = false

@@ -534,7 +534,6 @@
         mask
     } from "vue-the-mask"
 import { mapActions, mapState } from 'vuex'
-import { stat } from 'fs'
 export default {
     directives: {
         mask

@@ -106,10 +106,14 @@ export default new Vuex.Store({
   },
   mutations: {
     LOGIN(state, payload){
-      state.appState.loggedIn = true
-      state.drawer = true
       state.user.auth_token = payload.token
       state.user.auth_user = payload.user
+      setTimeout(() => {
+          state.appState.loggedIn = true
+      }, 500);
+      state.drawer = true
+      localStorage.setItem('auth_user', JSON.stringify(payload))
+      payload.relogin == true ? '' : router.push('/map')
       router.push('dashboard')
       Vue.swal('Success!', 'Logged in Successfully!', 'success')
     },
@@ -117,8 +121,11 @@ export default new Vuex.Store({
       Vue.swal(payload.title, payload.message, 'error')
     },
     LOGOUT(state){
-      state.appState.loggedIn = false,
       state.drawer = false
+      setTimeout(() => {
+          state.appState.loggedIn = false
+      }, 500);
+      localStorage.removeItem('auth_user')
       state.user.auth_token = ""
       state.user.auth_user = ""
       router.push('/')
@@ -221,7 +228,7 @@ export default new Vuex.Store({
     },
     PURCHASESTORE(state, payload){
       Vue.swal('Success!', 'Product Purchased Successfully!', 'success')
-      router.push({path: `/checkpurchase/${payload.id}`})
+      router.push({name: 'customer'})
     },
     PURCHASEUPDATE(state, payload){
       Vue.set(state.customers.customers[payload.index], 'name', payload.name)
@@ -262,6 +269,13 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    checkAppStatus({commit}){
+      let auth_user = JSON.parse(localStorage.getItem('auth_user', 0))
+      if(auth_user != null){
+          auth_user.relogin = true
+          commit('LOGIN', auth_user)
+      }
+    },
     login({commit, state}, payload){
       state.loading = true
       axios({
@@ -319,6 +333,9 @@ export default new Vuex.Store({
           model: payload.model,
           color: payload.color,
           price: payload.price,
+          quantity: payload.quantity,
+          downpayment: payload.downpayment,
+          price: payload.price,
           downpayment: payload.downpayment
         }
       })
@@ -342,13 +359,16 @@ export default new Vuex.Store({
           brand: payload.brand,
           model: payload.model,
           color: payload.color,
-          price: payload.price != 0 ? Number(payload.price.replace(/[^0-9.-]+/g,"")) : 0,
-          downpayment: payload.downpayment != 0 ? Number(payload.downpayment.replace(/[^0-9.-]+/g,"")) : 0
+          quantity: payload.quantity,
+          price: payload.price,
+          downpayment: payload.downpayment
         }
       })
       .then(res => {
-        commit('PRODUCTUPDATE', payload)
-        state.loading = false
+        if (payload.fromPurchase == false) {
+          commit('PRODUCTUPDATE', payload)
+          state.loading = false
+        }
       })
       .catch(err => state.loading = false)
     },
@@ -618,20 +638,77 @@ export default new Vuex.Store({
         commit('PURCHASEINIT', res.data)
       })
     },
-    purchasedProductsStore({commit, state}, payload){      
+    purchasedProductsStore({commit, state, dispatch}, payload){      
       state.loading = true
+      let purchase_data = {
+        term: payload.term,
+        amount_finance: payload.amount_finance,
+        monthly_amortization: payload.monthly_amortization,
+        priority_level: payload.priority_level,
+        MC_user_type: payload.MC_user_type,
+        loan_purpose: payload.loan_purpose,
+        sales_agent: payload.sales_agent,
+        user_id: payload.user_id,
+        product_id: payload.product_id
+      }
       axios({
         url: `${url}/api/purchased_products`,
         method: 'POST',
+        data: purchase_data
+      })
+      .then(res => {
+        let app_details = {
+          purchased_product_id: res.data.id,
+          application_type: payload.application_type,
+          tin: payload.tin,
+          driver_license: payload.driver_license,
+          sss: payload.sss,
+          gsis: payload.gsis,
+          customer_type: payload.customer_type
+        }
+        let app_requirements = {
+          purchased_product_id: res.data.id,
+          requirements: payload.requirements
+        }
+        let quantity = {
+          id: payload.product_id,
+          quantity: payload.quantity,
+          fromPurchase: true
+        }
+        dispatch('addAppDetails', app_details)
+        dispatch('addAppRequirements', app_requirements)
+        dispatch('productUpdate', quantity)
+      })
+      .catch(err => {
+        console.log(err);
+        
+        state.loading = false
+      })
+    },
+    addAppDetails({state}, payload){
+      axios({
+        url: `${url}/api/${payload.purchased_product_id}/app_details`,
+        method: 'POST',
         data: payload
       })
-      .then(res => {        
+      .then(() => {
+      })
+      .catch(err => {
+        state.loading = false
+      })
+    },
+    addAppRequirements({commit, state}, payload){
+      axios({
+        url: `${url}/api/${payload.purchased_product_id}/app_requirements`,
+        method: 'POST',
+        data: payload.requirements
+      })
+      .then(res => {
         commit('PURCHASESTORE', res.data)
         state.loading = false
       })
       .catch(err => {
         state.loading = false
-        commit('ERROR', err.response.data.errors)
       })
     },
     purchasedProductsUpdate({commit, state}, payload){
