@@ -214,7 +214,7 @@
             ></v-text-field>
           </v-col>
           </v-row>
-          <p class="title" ref='test'><v-icon left>mdi-google-maps</v-icon> GPS Location</p>
+          <p class="title" ref='test'><v-icon left>mdi-google-maps</v-icon> GPS Locator</p>
           <v-row>
             <v-col>  
               <gmap-map
