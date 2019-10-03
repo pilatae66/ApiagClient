@@ -49,6 +49,7 @@ function createWindow() {
     win.loadURL('app://./index.html')
     win.maximize()
     win.removeMenu()
+    // win.webContents.openDevTools()
   }
 
   win.on('closed', () => {

@@ -133,7 +133,7 @@
               <template v-slot:activator="{ on }">
                 <v-text-field
                   v-model="customer.customer_details.date_of_birth"
-                  label="Picker in dialog"
+                  label="Date of Birth"
                   readonly
                   v-on="on"
                   :error-messages="error.customer_details.date_of_birth"
@@ -225,6 +225,7 @@
                 @click="addCoordinates"    
               >
                 <gmap-marker
+                v-if="marker.position != null"
                   :position="marker.position"
                 />
               </gmap-map>
@@ -534,6 +535,7 @@
         mask
     } from "vue-the-mask"
 import { mapActions, mapState } from 'vuex'
+import router from '../router'
 export default {
     directives: {
         mask
@@ -546,8 +548,7 @@ export default {
         typeOrgItems:['Government', ' Cooperative', 'Private', 'NGO'],
         empstatItems:['Regular', 'Contractual', 'Probationary'],
         marker:{
-            position:{
-            }
+            position:null
         },
         customer: {
             map: null,
@@ -627,8 +628,6 @@ export default {
         ]),
         addCoordinates(place){
             this.$refs.gmap.$mapPromise.then((map) => {
-                console.log(this.$refs);
-                
                 this.map = map
             });
             this.marker.position = { lat: place.latLng.lat(), lng: place.latLng.lng() }
@@ -653,7 +652,7 @@ export default {
             this.customer.customer_financial_info.liability.splice(index,1)
         },
         goBack(){
-            this.$router.back()
+            this.$router.push({name:'customer'})
         },
         save(){
             this.customer.customer_address.lat = this.marker.position.lat

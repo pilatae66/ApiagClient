@@ -3,6 +3,17 @@ import Router from 'vue-router'
 import Home from './views/Home.vue'
 import Purchase from './views/Purchase.vue'
 import CheckPurchase from './views/CheckPurchase.vue'
+import Setting from './views/Setting.vue'
+import EditSettings from './views/EditSettings.vue'
+import Payment from './views/Payment.vue'
+import PaymentList from './views/PaymentList.vue'
+import Login from './views/Login.vue'
+import Dashboard from './views/Dashboard.vue'
+import Customer from './views/Customer.vue'
+import Admin from './views/Admin.vue'
+import Role from './views/Role.vue'
+import Product from './views/Product.vue'
+import CustomerCreate from './views/CustomerCreate.vue'
 
 Vue.use(Router)
 
@@ -18,37 +29,37 @@ export default new Router({
     {
       path: '/login',
       name: 'login',
-      component: () => import('./views/Login.vue')
+      component: Login
     },
     {
       path: '/dashboard',
       name: 'dashboard',
-      component: () => import('./views/Dashboard.vue')
+      component: Dashboard
     },
     {
       path: '/customer',
       name: 'customer',
-      component: () => import('./views/Customer.vue')
+      component: Customer
     },
     {
       path: '/admin',
       name: 'admin',
-      component: () => import('./views/Admin.vue')
+      component: Admin
     },
     {
       path: '/role',
       name: 'role',
-      component: () => import('./views/Role.vue')
+      component: Role
     },
     {
       path: '/products',
       name: 'products',
-      component: () => import('./views/Product.vue')
+      component: Product
     },
     {
       path: '/customercreate',
       name: 'customercreate',
-      component: () => import('./views/CustomerCreate.vue')
+      component: CustomerCreate
     },
     {
       path: '/checkpurchase/:id',
@@ -59,6 +70,26 @@ export default new Router({
       path: '/purchase/:id',
       name: 'purchase',
       component: Purchase
+    },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: Setting
+    },
+    {
+      path: '/editSettings',
+      name: 'editSettings',
+      component: EditSettings
+    },
+    {
+      path: '/payment',
+      name: 'payment',
+      component: Payment
+    },
+    {
+      path: '/paymentList',
+      name: 'paymentlist',
+      component: PaymentList
     },
   ]
 })

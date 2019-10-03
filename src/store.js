@@ -4,26 +4,27 @@ import Vuex from 'vuex'
 import router from "./router";
 
 Vue.use(Vuex)
-let url = process.env.NODE_ENV !== 'production' ? 'http://localhost:8000' : 'https://mighty-savannah-84780.herokuapp.com'
+let url = process.env.NODE_ENV !== 'production' ? 'http://localhost:8000' : 'https://transcycle-server.herokuapp.com'
 
 export default new Vuex.Store({
   state: {
     appState:{
       loggedIn:false
     },
+    payments: null,
     adminItems:[
       { title: 'Dashboard', icon: 'mdi-view-dashboard', to:'dashboard' },
-      { title: 'Customer', icon: 'mdi-face', to: 'customer' },
       { title: 'Admin', icon: 'perm_identity', to: 'admin' },
-      { title: 'Role', icon: 'perm_identity', to: 'role' },
       { title: 'Products', icon: 'motorcycle', to: 'products' },
+      { title: 'Settings', icon: 'settings', to: 'settings' },
     ],
     agentItems:[
       { title: 'Dashboard', icon: 'mdi-view-dashboard', to:'dashboard' },
       { title: 'Customer', icon: 'mdi-face', to: 'customer' },
     ],
     cashierItems:[
-      { title: 'Dashboard', icon: 'mdi-view-dashboard', to:'dashboard' },
+      { title: 'Payments', icon: 'mdi-cash-100', to:'payment' },
+      { title: 'Payments List', icon: 'mdi-cash-100', to:'paymentlist' },
     ],
     admins:{
       admins:[],
@@ -102,7 +103,9 @@ export default new Vuex.Store({
     },
     loading: false,
     drawer: false,
-    purchased_product:{}
+    purchased_product:{},
+    settings:{},
+    customer_purchase: null
   },
   mutations: {
     LOGIN(state, payload){
@@ -114,7 +117,7 @@ export default new Vuex.Store({
       state.drawer = true
       localStorage.setItem('auth_user', JSON.stringify(payload))
       payload.relogin == true ? '' : router.push('/map')
-      router.push('dashboard')
+      payload.user.role == 'Cashier' ? router.push('payment') : router.push('dashboard')
       Vue.swal('Success!', 'Logged in Successfully!', 'success')
     },
     LOGINERROR(state, payload){
@@ -226,14 +229,14 @@ export default new Vuex.Store({
     PURCHASEINIT(state, payload){
       state.customers.customers = payload.data
     },
-    PURCHASESTORE(state, payload){
+    PURCHASESTORE(state){
       Vue.swal('Success!', 'Product Purchased Successfully!', 'success')
       router.push({name: 'customer'})
+      state.loading = false
     },
     PURCHASEUPDATE(state, payload){
-      Vue.set(state.customers.customers[payload.index], 'name', payload.name)
-      state.customers.errors.name = ""
-      Vue.swal('Success!', 'Purchase Updated Successfully!', 'success')
+      // Vue.set(state.customers.customers[payload.index], 'name', payload.name)
+      // Vue.swal('Success!', 'Purchase Updated Successfully!', 'success')
     },
     PURCHASEDESTROY(state, payload){
       state.customers.customers.splice(payload,1)
@@ -242,6 +245,25 @@ export default new Vuex.Store({
     GETPURCHASE(state, payload){
       state.purchased_product = payload
       router.push({ path: `/checkpurchase/${payload.id}` })
+    },
+    SETTINGSINIT(state, payload){
+      state.settings = payload
+    },
+    SETTINGSUPDATE(state, payload){
+      Vue.set(state.settings, 'branch_name', payload.branch_name)
+      Vue.set(state.settings, 'branch_code', payload.branch_code)
+      Vue.swal('Success!', 'Settings Updated Successfully!', 'success')
+      router.push('/settings')
+    },
+    CUSTOMERPURCHASEINIT(state, payload){
+      state.customer_purchase = payload.data
+    },
+    BRANCHPAY(state, payload){
+      Vue.swal('Success!', 'Payment Received!', 'success')
+      state.loading = false
+    },
+    PAYMENTINIT(state, payload){
+      state.payments = payload.data
     },
     ERROR(state, payload){      
       state.customers.errors.customer_name.firstname = payload['customer.customer_name.firstname']
@@ -269,6 +291,71 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    paymentsInit({commit}){
+      axios({
+        url: `${url}/api/payments`,
+        method:"get"
+      }).then(res => {
+        commit('PAYMENTINIT', res.data)
+      }).catch(err => { 
+        console.log(err.response)
+      })
+    },
+    addBranchPayment({commit, state, dispatch}, payload){
+      state.loading = true
+      axios({
+        url: `${url}/api/payments`,
+        method:"post",
+        data:payload.pay
+      }).then(res => {
+        
+        commit('BRANCHPAY', res.data)
+        let data = {
+          id: payload.product_id,
+          purchase:{
+            amount_due: payload.amount_due
+          }
+        }
+        dispatch('purchasedProductsUpdate', data)
+      })
+    },
+    getCustomerPurchase({commit}, payload){
+      axios({
+        url: `${url}/api/${payload}/get_purchase`,
+        method:"get"
+      }).then(res => {
+        commit('CUSTOMERPURCHASEINIT', res.data)
+      }).catch(err => { 
+        console.log(err.response)
+      })
+    },
+    settingsInit({commit}){
+      axios({
+        url: `${url}/api/settings`,
+        method:"get"
+      }).then(res => {
+        commit('SETTINGSINIT', res.data)
+      }).catch(err => { 
+        console.log(err.response)
+      })
+    },
+    settingsUpdate({commit, state}, payload){
+      state.loading = true
+      axios({
+        url: `${url}/api/settings/${payload.old_branch.id}`,
+        method: 'POST',
+        data: {
+          _method: 'PUT',
+          branch_name: payload.new_branch.branch_name,
+          branch_code: payload.new_branch.branch_code,
+        }
+      })
+      .then(res => {
+          commit('SETTINGSUPDATE', payload)
+          state.loading = false
+      })
+      .catch(err => state.loading = false)
+    },
     checkAppStatus({commit}){
       let auth_user = JSON.parse(localStorage.getItem('auth_user', 0))
       if(auth_user != null){
@@ -336,7 +423,7 @@ export default new Vuex.Store({
           quantity: payload.quantity,
           downpayment: payload.downpayment,
           price: payload.price,
-          downpayment: payload.downpayment
+          purchased_date: payload.purchased_date
         }
       })
       .then(res => {
@@ -361,7 +448,7 @@ export default new Vuex.Store({
           color: payload.color,
           quantity: payload.quantity,
           price: payload.price,
-          downpayment: payload.downpayment
+          purchased_date: payload.purchased_date
         }
       })
       .then(res => {
@@ -518,8 +605,6 @@ export default new Vuex.Store({
         }
       })
       .then(res => {
-        console.log(res.data.data);
-        
         res.data.data.index = payload.index
         commit('USERUPDATE', res.data.data)
         state.loading = false
@@ -644,6 +729,7 @@ export default new Vuex.Store({
         term: payload.term,
         amount_finance: payload.amount_finance,
         monthly_amortization: payload.monthly_amortization,
+        amount_due: payload.amount_finance,
         priority_level: payload.priority_level,
         MC_user_type: payload.MC_user_type,
         loan_purpose: payload.loan_purpose,
@@ -657,6 +743,7 @@ export default new Vuex.Store({
         data: purchase_data
       })
       .then(res => {
+        console.log(res)
         let app_details = {
           purchased_product_id: res.data.id,
           application_type: payload.application_type,
@@ -680,12 +767,11 @@ export default new Vuex.Store({
         dispatch('productUpdate', quantity)
       })
       .catch(err => {
-        console.log(err);
-        
-        state.loading = false
+        console.log(err.response);
       })
     },
-    addAppDetails({state}, payload){
+    addAppDetails({state, commit}, payload){
+      console.log(payload)
       axios({
         url: `${url}/api/${payload.purchased_product_id}/app_details`,
         method: 'POST',
@@ -693,32 +779,29 @@ export default new Vuex.Store({
       })
       .then(() => {
       })
-      .catch(err => {
-        state.loading = false
-      })
     },
     addAppRequirements({commit, state}, payload){
+      console.log(payload)
       axios({
         url: `${url}/api/${payload.purchased_product_id}/app_requirements`,
         method: 'POST',
         data: payload.requirements
       })
       .then(res => {
-        commit('PURCHASESTORE', res.data)
-        state.loading = false
-      })
-      .catch(err => {
+        commit('PURCHASESTORE')
         state.loading = false
       })
     },
     purchasedProductsUpdate({commit, state}, payload){
+      console.log(payload);
+      
       state.loading = true
       axios({
         url: `${url}/api/purchased_products/${payload.id}`,
-        method: 'POST',
+        method: 'PUT',
         data: {
           _method: 'PUT',
-          type: payload.name,
+          amount_due: payload.purchase.amount_due,
         }
       })
       .then(res => {

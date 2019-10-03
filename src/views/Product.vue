@@ -53,6 +53,32 @@
                     <v-text-field v-model="editedItem.downpayment" label="Product Downpayment"></v-text-field>
                   </v-col>
                 </v-row>
+                <v-row>
+                  <v-col>
+                     <v-dialog
+                      ref="dialog"
+                      v-model="modal"
+                      :return-value.sync="editedItem.purchased_date"
+                      persistent
+                      full-width
+                      width="290px"
+                    >
+                      <template v-slot:activator="{ on }">
+                        <v-text-field
+                          v-model="editedItem.purchased_date"
+                          label="Purchased Date"
+                          readonly
+                          v-on="on"
+                        ></v-text-field>
+                      </template>
+                      <v-date-picker v-model="editedItem.purchased_date" type="date" scrollable>
+                        <div class="flex-grow-1"></div>
+                        <v-btn text color="primary" @click="modal = false">Cancel</v-btn>
+                        <v-btn text color="primary" @click="$refs.dialog.save(editedItem.purchased_date)">OK</v-btn>
+                      </v-date-picker>
+                    </v-dialog>
+                  </v-col>
+                </v-row>
               </v-container>
             </v-card-text>
 
@@ -91,6 +117,7 @@
   export default {
     data: () => ({
       dialog: false,
+      modal: false,
       typeItems: [
         'REPO', 'NEW'
       ],
@@ -121,6 +148,7 @@
         price: '',
         quantity: '',
         downpayment: '',
+        purchased_date:''
       },
       defaultItem: {
         id: '',
@@ -131,6 +159,7 @@
         price: '',
         quantity: '',
         downpayment: '',
+        purchased_date:''
       },
     }),
 
@@ -198,7 +227,9 @@
             model: this.editedItem.model,
             color: this.editedItem.color,
             price: this.editedItem.price,
+            quantity: this.editedItem.quantity,
             downpayment: this.editedItem.downpayment,
+            purchased_date: this.editedItem.purchased_date,
             index: this.editedIndex
           }
           this.productUpdate(data)
@@ -210,9 +241,11 @@
             model: this.editedItem.model,
             color: this.editedItem.color,
             price: this.editedItem.price,
-            downpayment: this.editedItem.downpayment
+            quantity: this.editedItem.quantity,
+            downpayment: this.editedItem.downpayment,
+            purchased_date: this.editedItem.purchased_date,
           }
-          console.log(this.productStore(data))
+          this.productStore(data)
         }
       },
     },

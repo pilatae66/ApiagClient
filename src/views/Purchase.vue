@@ -123,7 +123,7 @@
                     <v-card-actions>
                         <v-btn depressed @click="goBack" color="blue" dark><v-icon left>mdi-arrow-left</v-icon> Go Back</v-btn>
                         <v-spacer></v-spacer>
-                        <v-btn depressed color="green" dark @click="save()">Save <v-icon right>mdi-content-save</v-icon></v-btn>
+                        <v-btn depressed color="green" dark @click="save()" :loading="loading">Save <v-icon right>mdi-content-save</v-icon></v-btn>
                     </v-card-actions>
                 </v-card>
             </v-col>
@@ -184,7 +184,8 @@ export default {
         ...mapState({
             products: state => state.products.products,
             auth_user_id: state => state.user.auth_user.id,
-            purchased_product: 'purchased_product'
+            purchased_product: 'purchased_product',
+            loading: 'loading'
         }),
     },
     methods:{
@@ -212,9 +213,7 @@ export default {
             let product = this.products.filter(product => {
                 return product.id == this.selectedProduct
             })
-            console.log(product[0].quantity - 1);
-            
-            
+
             let amountFinance = Number(product[0].price.replace(/[^0-9.-]+/g,"")) - Number(product[0].downpayment.replace(/[^0-9.-]+/g,""))
             let monthlyAmortization = amountFinance / this.term
             let data = {

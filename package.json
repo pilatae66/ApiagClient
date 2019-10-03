@@ -1,12 +1,13 @@
 {
   "name": "electron-vue-learning",
-  "version": "1.3.0",
+  "version": "1.6.4",
   "private": true,
   "scripts": {
     "build": "electron-builder build --win --publish never",
     "deploy": "electron-builder build --win --publish always",
     "lint": "vue-cli-service lint",
     "electron:build": "vue-cli-service electron:build --win --publish always",
+    "electron:buildDev": "vue-cli-service electron:build --win --publish never",
     "electron:serve": "vue-cli-service electron:serve",
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps"
