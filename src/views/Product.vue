@@ -47,9 +47,6 @@
                     <v-text-field v-model="editedItem.price" label="Product Price"></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="6">
-                    <v-text-field v-model="editedItem.quantity" label="Product Quantity"></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="6">
                     <v-text-field v-model="editedItem.downpayment" label="Product Downpayment"></v-text-field>
                   </v-col>
                 </v-row>
@@ -58,23 +55,22 @@
                      <v-dialog
                       ref="dialog"
                       v-model="modal"
-                      :return-value.sync="editedItem.purchased_date"
+                      :return-value.sync="editedItem.date_registered"
                       persistent
                       full-width
                       width="290px"
                     >
                       <template v-slot:activator="{ on }">
                         <v-text-field
-                          v-model="editedItem.purchased_date"
+                          v-model="editedItem.date_registered"
                           label="Purchased Date"
-                          readonly
                           v-on="on"
                         ></v-text-field>
                       </template>
-                      <v-date-picker v-model="editedItem.purchased_date" type="date" scrollable>
+                      <v-date-picker v-model="editedItem.date_registered" type="date" scrollable>
                         <div class="flex-grow-1"></div>
                         <v-btn text color="primary" @click="modal = false">Cancel</v-btn>
-                        <v-btn text color="primary" @click="$refs.dialog.save(editedItem.purchased_date)">OK</v-btn>
+                        <v-btn text color="primary" @click="$refs.dialog.save(editedItem.date_registered)">OK</v-btn>
                       </v-date-picker>
                     </v-dialog>
                   </v-col>
@@ -133,7 +129,6 @@
         { text: 'Model', value: 'model', width: 170 },
         { text: 'Color', value: 'color', width: 170 },
         { text: 'Price', value: 'price', width: 170 },
-        { text: 'Quantity', value: 'quantity', width: 170 },
         { text: 'Downpayment', value: 'downpayment', width: 170 },
         { text: 'Date Registered', value: 'date_registered', width: 170 },
         { text: 'Actions', value: 'action', sortable: false }
@@ -146,9 +141,8 @@
         model: '',
         color: '',
         price: '',
-        quantity: '',
         downpayment: '',
-        purchased_date:''
+        date_registered:''
       },
       defaultItem: {
         id: '',
@@ -157,9 +151,8 @@
         model: '',
         color: '',
         price: '',
-        quantity: '',
         downpayment: '',
-        purchased_date:''
+        date_registered:''
       },
     }),
 
@@ -221,17 +214,17 @@
       save () {
         if (this.editedIndex > -1) {
           let data = {
+            _method: "PUT",
             id: this.editedItem.id,
             type: this.editedItem.type,
             brand: this.editedItem.brand,
             model: this.editedItem.model,
             color: this.editedItem.color,
-            price: this.editedItem.price,
-            quantity: this.editedItem.quantity,
-            downpayment: this.editedItem.downpayment,
-            purchased_date: this.editedItem.purchased_date,
+            price: Number(this.editedItem.price.replace(/[^0-9.-]+/g,"")),
+            downpayment: Number(this.editedItem.downpayment.replace(/[^0-9.-]+/g,"")),
+            purchased_date: this.editedItem.date_registered,
             index: this.editedIndex
-          }
+          }          
           this.productUpdate(data)
         } else {
           let data = {
@@ -240,10 +233,9 @@
             brand: this.editedItem.brand,
             model: this.editedItem.model,
             color: this.editedItem.color,
-            price: this.editedItem.price,
-            quantity: this.editedItem.quantity,
-            downpayment: this.editedItem.downpayment,
-            purchased_date: this.editedItem.purchased_date,
+            price: Number(this.editedItem.price.replace(/[^0-9.-]+/g,"")),
+            downpayment: Number(this.editedItem.downpayment.replace(/[^0-9.-]+/g,"")),
+            purchased_date: this.editedItem.date_registered,
           }
           this.productStore(data)
         }

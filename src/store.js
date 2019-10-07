@@ -11,6 +11,7 @@ export default new Vuex.Store({
     appState:{
       loggedIn:false
     },
+    due_customers: null,
     payments: null,
     adminItems:[
       { title: 'Dashboard', icon: 'mdi-view-dashboard', to:'dashboard' },
@@ -105,7 +106,12 @@ export default new Vuex.Store({
     drawer: false,
     purchased_product:{},
     settings:{},
-    customer_purchase: null
+    customer_purchase: null,
+    customers_with_purchase: [
+      {
+        id:''
+      }
+    ]
   },
   mutations: {
     LOGIN(state, payload){
@@ -146,16 +152,13 @@ export default new Vuex.Store({
       Vue.swal('Success!', 'Product Added Successfully!', 'success')
     },
     PRODUCTUPDATE(state, payload){
-      Vue.set(state.products.products[payload.index], 'type', payload.type)
-      Vue.set(state.products.products[payload.index], 'brand', payload.brand)
-      Vue.set(state.products.products[payload.index], 'model', payload.model)
-      Vue.set(state.products.products[payload.index], 'color', payload.color)
-      Vue.set(state.products.products[payload.index], 'price', payload.price)
-      Vue.set(state.products.products[payload.index], 'downpayment', payload.downpayment)
-      state.products.errors.type = ""
-      state.products.errors.brand = ""
-      state.products.errors.model = ""
-      state.products.errors.color = ""
+      Vue.set(state.products.products[payload.index], 'type', payload.product.type)
+      Vue.set(state.products.products[payload.index], 'brand', payload.product.brand)
+      Vue.set(state.products.products[payload.index], 'model', payload.product.model)
+      Vue.set(state.products.products[payload.index], 'color', payload.product.color)
+      Vue.set(state.products.products[payload.index], 'price', payload.product.price)
+      Vue.set(state.products.products[payload.index], 'downpayment', payload.product.downpayment)
+      Vue.set(state.products.products[payload.index], 'date_registered', payload.product.date_registered)
       Vue.swal('Success!', 'Product Updated Successfully!', 'success')
     },
     PRODUCTDESTROY(state, payload){
@@ -211,6 +214,9 @@ export default new Vuex.Store({
     CUSTOMERINIT(state, payload){
       state.customers.customers = payload.data
     },
+    CUSTOMERSWITHPURCHASE(state, payload){
+      state.customers_with_purchase = payload.data
+    },
     CUSTOMERSTORE(state, payload){
       state.customers.customers.push(payload)
       state.customers.errors.name = ""
@@ -265,6 +271,9 @@ export default new Vuex.Store({
     PAYMENTINIT(state, payload){
       state.payments = payload.data
     },
+    DUECUSTOMERSINIT(state, payload){
+      state.due_customers = payload.data
+    },
     ERROR(state, payload){      
       state.customers.errors.customer_name.firstname = payload['customer.customer_name.firstname']
       state.customers.errors.customer_name.middlename = payload['customer.customer_name.middlename']
@@ -291,6 +300,26 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    getCustomersWithPurchase({commit}){
+      axios({
+        url: `${url}/api/getCustomersWithPurchase`,
+        method:"get"
+      }).then(res => {
+        commit('CUSTOMERSWITHPURCHASE', res.data)
+      }).catch(err => { 
+        console.log(err.response)
+      })
+    },
+    dueCustomersInit({commit}){
+      axios({
+        url: `${url}/api/get_due_costumers`,
+        method:"get"
+      }).then(res => {
+        commit('DUECUSTOMERSINIT', res.data)
+      }).catch(err => { 
+        console.log(err.response)
+      })
+    },
     paymentsInit({commit}){
       axios({
         url: `${url}/api/payments`,
@@ -440,28 +469,21 @@ export default new Vuex.Store({
       axios({
         url: `${url}/api/products/${payload.id}`,
         method: 'POST',
-        data: {
-          _method: 'PUT',
-          type: payload.type,
-          brand: payload.brand,
-          model: payload.model,
-          color: payload.color,
-          quantity: payload.quantity,
-          price: payload.price,
-          purchased_date: payload.purchased_date
-        }
+        data: payload
       })
       .then(res => {
-        if (payload.fromPurchase == false) {
-          commit('PRODUCTUPDATE', payload)
+          let data = {
+            index: payload.index,
+            product: res.data
+          }
+          commit('PRODUCTUPDATE', data)
           state.loading = false
-        }
       })
       .catch(err => state.loading = false)
     },
     productDestroy({commit}, payload){
       Vue.swal({
-        title: 'Do you really want to delete this role?',
+        title: 'Do you really want to delete this Product?',
         showCancelButton: true,
         confirmButtonText: 'Yes',
         showLoaderOnConfirm: true,
@@ -743,7 +765,6 @@ export default new Vuex.Store({
         data: purchase_data
       })
       .then(res => {
-        console.log(res)
         let app_details = {
           purchased_product_id: res.data.id,
           application_type: payload.application_type,
@@ -764,7 +785,6 @@ export default new Vuex.Store({
         }
         dispatch('addAppDetails', app_details)
         dispatch('addAppRequirements', app_requirements)
-        dispatch('productUpdate', quantity)
       })
       .catch(err => {
         console.log(err.response);
@@ -781,7 +801,6 @@ export default new Vuex.Store({
       })
     },
     addAppRequirements({commit, state}, payload){
-      console.log(payload)
       axios({
         url: `${url}/api/${payload.purchased_product_id}/app_requirements`,
         method: 'POST',

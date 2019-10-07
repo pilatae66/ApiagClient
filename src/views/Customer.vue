@@ -56,6 +56,7 @@
     </template>
     <template v-slot:item.action="{ item }">
       <v-icon
+        v-show="item.has_already_purchased"
         small
         class="mr-2"
         @click="addPurchase(item)"
