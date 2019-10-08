@@ -14,13 +14,12 @@ export default new Vuex.Store({
     due_customers: null,
     payments: null,
     adminItems:[
-      { title: 'Dashboard', icon: 'mdi-view-dashboard', to:'dashboard' },
       { title: 'Admin', icon: 'perm_identity', to: 'admin' },
       { title: 'Products', icon: 'motorcycle', to: 'products' },
+      { title: 'Purchases', icon: 'mdi-cash-100', to: 'purchaselist' },
       { title: 'Settings', icon: 'settings', to: 'settings' },
     ],
     agentItems:[
-      { title: 'Dashboard', icon: 'mdi-view-dashboard', to:'dashboard' },
       { title: 'Customer', icon: 'mdi-face', to: 'customer' },
     ],
     cashierItems:[
@@ -102,6 +101,7 @@ export default new Vuex.Store({
         }
       }
     },
+    purchasedProducts:[],
     loading: false,
     drawer: false,
     purchased_product:{},
@@ -122,8 +122,23 @@ export default new Vuex.Store({
       }, 500);
       state.drawer = true
       localStorage.setItem('auth_user', JSON.stringify(payload))
-      payload.relogin == true ? '' : router.push('/map')
-      payload.user.role == 'Cashier' ? router.push('payment') : router.push('dashboard')
+      switch (payload.user.role) {
+        case 'Cashier':
+          router.push('payment')
+          break;
+
+        case 'Admin':
+          router.push('admin')
+          break;
+      
+
+        case 'Agent':
+          router.push('customer')
+          break;
+      
+        default:
+          break;
+      }
       Vue.swal('Success!', 'Logged in Successfully!', 'success')
     },
     LOGINERROR(state, payload){
@@ -224,8 +239,9 @@ export default new Vuex.Store({
       router.push({name: 'customer'})
     },
     CUSTOMERUPDATE(state, payload){
-      Vue.set(state.customers.customers[payload.index], 'name', payload.name)
-      state.customers.errors.name = ""
+      const customer = state.customers.customers.find(customer => customer.id == payload.data.id)
+      Object.assign(customer, payload.data)
+      router.push({ name: 'customer' })
       Vue.swal('Success!', 'Customer Updated Successfully!', 'success')
     },
     CUSTOMERDESTROY(state, payload){
@@ -233,7 +249,7 @@ export default new Vuex.Store({
       Vue.swal('Success!', 'Customer Deleted Successfully!', 'success')
     },
     PURCHASEINIT(state, payload){
-      state.customers.customers = payload.data
+      state.purchasedProducts = payload.data
     },
     PURCHASESTORE(state){
       Vue.swal('Success!', 'Product Purchased Successfully!', 'success')
@@ -696,14 +712,11 @@ export default new Vuex.Store({
       state.loading = true
       axios({
         url: `${url}/api/customers/${payload.id}`,
-        method: 'POST',
-        data: {
-          _method: 'PUT',
-          type: payload.name,
-        }
+        method: 'PUT',
+        data: payload
       })
       .then(res => {
-        commit('CUSTOMERUPDATE', payload)
+        commit('CUSTOMERUPDATE', res.data)
         state.loading = false
       })
       .catch(err => state.loading = false)
@@ -713,6 +726,7 @@ export default new Vuex.Store({
         title: 'Do you really want to delete this customer?',
         showCancelButton: true,
         confirmButtonText: 'Yes',
+        confirmButtonColor:'red',
         showLoaderOnConfirm: true,
         preConfirm: () => {
           return fetch(`${url}/api/customers/${payload.id}`, {
@@ -724,12 +738,12 @@ export default new Vuex.Store({
               }
             })
             .catch(error => {
-              Swal.showValidationMessage(
+              Vue.swal.showValidationMessage(
                 `Request failed: ${error}`
               )
             })
         },
-        allowOutsideClick: () => !Swal.isLoading()
+        allowOutsideClick: () => !Vue.swal.isLoading()
       }).then((result) => {
         if (result.value) {
           commit('CUSTOMERDESTROY', payload.index)

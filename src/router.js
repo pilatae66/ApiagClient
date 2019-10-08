@@ -14,6 +14,9 @@ import Admin from './views/Admin.vue'
 import Role from './views/Role.vue'
 import Product from './views/Product.vue'
 import CustomerCreate from './views/CustomerCreate.vue'
+import CustomerEdit from './views/CustomerEdit.vue'
+import PurchaseList from './views/PurchaseList.vue'
+import PurchaseEdit from './views/PurchaseEdit.vue'
 
 Vue.use(Router)
 
@@ -62,6 +65,11 @@ export default new Router({
       component: CustomerCreate
     },
     {
+      path: '/customeredit',
+      name: 'customeredit',
+      component: CustomerEdit
+    },
+    {
       path: '/checkpurchase/:id',
       name: 'checkpurchase',
       component: CheckPurchase
@@ -75,6 +83,16 @@ export default new Router({
       path: '/settings',
       name: 'settings',
       component: Setting
+    },
+    {
+      path: '/purchaselist',
+      name: 'purchaselist',
+      component: PurchaseList
+    },
+    {
+      path: '/purchasedit',
+      name: 'purchasedit',
+      component: PurchaseEdit
     },
     {
       path: '/editSettings',

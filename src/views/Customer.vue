@@ -56,7 +56,7 @@
     </template>
     <template v-slot:item.action="{ item }">
       <v-icon
-        v-show="item.has_already_purchased"
+        v-show="!item.has_already_purchased"
         small
         class="mr-2"
         @click="addPurchase(item)"
@@ -95,7 +95,7 @@
           text: 'Name',
           align: 'left',
           sortable: false,
-          value: 'name',
+          value: 'full_name',
           width: 500
         },
         { text: 'E-mail', value: 'details.email', width: 500 },
@@ -156,10 +156,7 @@
         'customerDestroy',
       ]),
       editItem (item) {
-        this.editedIndex = this.customers.indexOf(item)
-        this.editedItem = Object.assign({}, item)
-        this.editedItem.role_id = parseInt(this.editedItem.role_id)
-        this.dialog = true              
+        router.push({ name: 'customeredit', params:{ item } })             
       },
       addPurchase(item){
         router.push({ path: `/purchase/${item.id}` })
