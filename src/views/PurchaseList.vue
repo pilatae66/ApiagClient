@@ -91,7 +91,7 @@
       },
       deleteItem (item) {
         let data = {
-          index: this.customers.indexOf(item),
+          index: this.purchasedProducts.indexOf(item),
           id: item.id
         }
         this.purchasedProductsDestroy(data)

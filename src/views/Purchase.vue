@@ -56,21 +56,21 @@
                         </v-row>
                         <v-row>
                             <v-col cols="2">
-                                <v-text-field placeholder="Term" type="number" v-model="term"></v-text-field>
+                                <v-text-field label="Term" type="number" v-model="term"></v-text-field>
                             </v-col>
                             <v-col cols="5">
-                                <v-text-field placeholder="TIN Number" type="number" v-model="tin"></v-text-field>
+                                <v-text-field label="TIN Number" type="number" v-model="tin"></v-text-field>
                             </v-col>
                             <v-col cols="5">
-                                <v-text-field placeholder="SSS" type="number" v-model="sss"></v-text-field>
+                                <v-text-field label="SSS" type="number" v-model="sss"></v-text-field>
                             </v-col>
                         </v-row>
                         <v-row>
                             <v-col cols="6">
-                                <v-text-field placeholder="Driver's License" type="number" v-model="driver_license"></v-text-field>
+                                <v-text-field label="Driver's License" type="number" v-model="driver_license"></v-text-field>
                             </v-col>
                             <v-col cols="6">
-                                <v-text-field placeholder="GSIS Number" type="number" v-model="gsis"></v-text-field>
+                                <v-text-field label="GSIS Number" type="number" v-model="gsis"></v-text-field>
                             </v-col>
                         </v-row>
                         <v-row>

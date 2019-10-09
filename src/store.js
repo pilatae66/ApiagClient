@@ -257,11 +257,13 @@ export default new Vuex.Store({
       state.loading = false
     },
     PURCHASEUPDATE(state, payload){
-      // Vue.set(state.customers.customers[payload.index], 'name', payload.name)
-      // Vue.swal('Success!', 'Purchase Updated Successfully!', 'success')
+      const purchase = state.purchasedProducts.find(purchase => purchase.id == payload.data.id)
+      Object.assign(purchase, payload.data)
+      router.push({ name: 'purchaselist' })
+      Vue.swal('Success!', 'Customer Purchase Updated Successfully!', 'success')
     },
     PURCHASEDESTROY(state, payload){
-      state.customers.customers.splice(payload,1)
+      state.purchasedProducts.splice(payload,1)
       Vue.swal('Success!', 'Purchase Deleted Successfully!', 'success')
     },
     GETPURCHASE(state, payload){
@@ -832,13 +834,11 @@ export default new Vuex.Store({
       axios({
         url: `${url}/api/purchased_products/${payload.id}`,
         method: 'PUT',
-        data: {
-          _method: 'PUT',
-          amount_due: payload.purchase.amount_due,
-        }
+        data: payload.purchased_product
       })
       .then(res => {
-        commit('PURCHASEUPDATE', payload)
+        console.log(res.data)
+        commit('PURCHASEUPDATE', res.data)
         state.loading = false
       })
       .catch(err => state.loading = false)
@@ -848,6 +848,7 @@ export default new Vuex.Store({
         title: 'Do you really want to delete this Purchased Product?',
         showCancelButton: true,
         confirmButtonText: 'Yes',
+        confirmButtonColor: 'red',
         showLoaderOnConfirm: true,
         preConfirm: () => {
           return fetch(`${url}/api/purchased_products/${payload.id}`, {
@@ -859,12 +860,12 @@ export default new Vuex.Store({
               }
             })
             .catch(error => {
-              Swal.showValidationMessage(
+              Vue.swal.showValidationMessage(
                 `Request failed: ${error}`
               )
             })
         },
-        allowOutsideClick: () => !Swal.isLoading()
+        allowOutsideClick: () => !Vue.swal.isLoading()
       }).then((result) => {
         if (result.value) {
           commit('PURCHASEDESTROY', payload.index)

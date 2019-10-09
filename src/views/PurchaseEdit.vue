@@ -61,21 +61,21 @@
                         </v-row>
                         <v-row>
                             <v-col cols="2">
-                                <v-text-field placeholder="Term" type="number" v-model="purchased_product.term"></v-text-field>
+                                <v-text-field label="Term" type="number" v-model="purchased_product.term"></v-text-field>
                             </v-col>
                             <v-col cols="5">
-                                <v-text-field placeholder="TIN Number" type="number" v-model="purchased_product.app_details.tin"></v-text-field>
+                                <v-text-field label="TIN Number" type="number" v-model="purchased_product.app_details.tin"></v-text-field>
                             </v-col>
                             <v-col cols="5">
-                                <v-text-field placeholder="SSS" type="number" v-model="purchased_product.app_details.sss"></v-text-field>
+                                <v-text-field label="SSS" type="number" v-model="purchased_product.app_details.sss"></v-text-field>
                             </v-col>
                         </v-row>
                         <v-row>
                             <v-col cols="6">
-                                <v-text-field placeholder="Driver's License" type="number" v-model="purchased_product.app_details.driver_license"></v-text-field>
+                                <v-text-field label="Driver's License" type="number" v-model="purchased_product.app_details.driver_license"></v-text-field>
                             </v-col>
                             <v-col cols="6">
-                                <v-text-field placeholder="GSIS Number" type="number" v-model="purchased_product.app_details.gsis"></v-text-field>
+                                <v-text-field label="GSIS Number" type="number" v-model="purchased_product.app_details.gsis"></v-text-field>
                             </v-col>
                         </v-row>
                         <v-row>
@@ -115,7 +115,7 @@
                                 <v-select
                                     v-model="purchased_product.requirements"
                                     :items="requirementItems"
-                                    :value="purchased_product.requirements.requirement_name"
+                                    :value="purchased_product.requirements"
                                     label="Requirements"
                                     multiple
                                     chips
@@ -181,6 +181,9 @@ export default {
         this.productInit()
         this.purchased_product = this.$route.params.item
         this.selectedProduct = this.$route.params.item.product
+        this.purchased_product.requirements = this.purchased_product.requirements.map(requirement => {
+            return requirement.requirement_name
+        })
     },
     watch:{
         search (val) {
@@ -197,7 +200,7 @@ export default {
     methods:{
         ...mapActions([
             'productInit',
-            'purchasedProductsStore',
+            'purchasedProductsUpdate',
             'productShow'
         ]),
         filterProducts(item, queryText, itemText) {
@@ -217,31 +220,34 @@ export default {
         },
         save(){
             let product = this.products.filter(product => {
-                return product.id == this.selectedProduct
+                return product.id == this.selectedProduct.id
             })
 
             let amountFinance = Number(product[0].price.replace(/[^0-9.-]+/g,"")) - Number(product[0].downpayment.replace(/[^0-9.-]+/g,""))
-            let monthlyAmortization = amountFinance / this.term
+            let monthlyAmortization = amountFinance / this.purchased_product.term
             let data = {
-                term: parseInt(this.term),
-                product_id: this.selectedProduct,
-                quantity: product[0].quantity - 1,
-                application_type: this.application_type,
-                tin: this.tin,
-                sss: this.sss,
-                driver_license: this.driver_license,
-                gsis: this.gsis,
-                user_id: this.id,
-                priority_level: this.priority_level,
-                MC_user_type: this.MC_user_type,
-                loan_purpose: this.loan_purpose,
-                amount_finance: amountFinance,
-                monthly_amortization: monthlyAmortization.toFixed(2),
-                sales_agent: this.auth_user_id,
-                requirements: this.requirements,
-                customer_type: this.customer_type
+                id: this.purchased_product.id,
+                purchased_product:{
+                    term: parseInt(this.purchased_product.term),
+                    product_id: this.selectedProduct.id,
+                    user_id: this.purchased_product.customer.id,
+                    priority_level: this.purchased_product.priority_level,
+                    MC_user_type: this.purchased_product.MC_user_type,
+                    loan_purpose: this.purchased_product.loan_purpose,
+                    amount_finance: amountFinance,
+                    monthly_amortization: monthlyAmortization.toFixed(2),
+                    requirements: this.purchased_product.requirements,
+                    app_details:{
+                        application_type: this.purchased_product.app_details.application_type,
+                        tin: this.purchased_product.app_details.tin,
+                        sss: this.purchased_product.app_details.sss,
+                        customer_type: this.purchased_product.app_details.customer_type,
+                        driver_license: this.purchased_product.app_details.driver_license,
+                        gsis: this.purchased_product.app_details.gsis,
+                    }
+                }
             }
-            this.purchasedProductsStore(data)
+            this.purchasedProductsUpdate(data)
         }
     }
 }

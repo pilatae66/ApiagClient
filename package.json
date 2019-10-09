@@ -1,6 +1,6 @@
 {
   "name": "electron-vue-learning",
-  "version": "1.6.4",
+  "version": "1.7.0",
   "private": true,
   "scripts": {
     "build": "electron-builder build --win --publish never",
