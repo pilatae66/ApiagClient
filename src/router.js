@@ -17,6 +17,7 @@ import CustomerCreate from './views/CustomerCreate.vue'
 import CustomerEdit from './views/CustomerEdit.vue'
 import PurchaseList from './views/PurchaseList.vue'
 import PurchaseEdit from './views/PurchaseEdit.vue'
+import Reports from './views/Reports.vue'
 
 Vue.use(Router)
 
@@ -108,6 +109,11 @@ export default new Router({
       path: '/paymentList',
       name: 'paymentlist',
       component: PaymentList
+    },
+    {
+      path: '/reports',
+      name: 'reports',
+      component: Reports
     },
   ]
 })

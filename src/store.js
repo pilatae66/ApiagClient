@@ -13,10 +13,15 @@ export default new Vuex.Store({
     },
     due_customers: null,
     payments: null,
+    reports: {
+      payments: null,
+      purchased_products: null
+    },
     adminItems:[
       { title: 'Admin', icon: 'perm_identity', to: 'admin' },
       { title: 'Products', icon: 'motorcycle', to: 'products' },
       { title: 'Purchases', icon: 'mdi-cash-100', to: 'purchaselist' },
+      { title: 'Reports', icon: 'report', to: 'reports' },
       { title: 'Settings', icon: 'settings', to: 'settings' },
     ],
     agentItems:[
@@ -292,6 +297,11 @@ export default new Vuex.Store({
     DUECUSTOMERSINIT(state, payload){
       state.due_customers = payload.data
     },
+    GENERATEREPORTS(state, payload){
+      console.log(payload.data)
+      state.reports = payload.data
+      state.loading = false
+    },
     ERROR(state, payload){      
       state.customers.errors.customer_name.firstname = payload['customer.customer_name.firstname']
       state.customers.errors.customer_name.middlename = payload['customer.customer_name.middlename']
@@ -318,6 +328,12 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    generateReports({commit, state}, payload){
+      state.loading = true
+      axios.post(`${url}/api/generateReport`, payload).then(res => {
+        commit('GENERATEREPORTS', res)
+      })
+    },
     getCustomersWithPurchase({commit}){
       axios({
         url: `${url}/api/getCustomersWithPurchase`,
