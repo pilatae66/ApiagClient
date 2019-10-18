@@ -45,7 +45,7 @@
                     <v-select
                       v-model="editedItem.role_id"
                       label="Role"
-                      :items="roles"
+                      :items="adminRoles"
                       item-text="name"
                       item-value="id"
                       :error-messages="error.type"
@@ -133,6 +133,11 @@
       formTitle () {
         return this.editedIndex === -1 ? 'New Admin' : 'Edit Admin'
       },
+      adminRoles(){
+        return this.roles.filter(item => {
+          return item.name != 'Customer'
+        })
+      }
     },
 
     watch: {

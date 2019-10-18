@@ -88,6 +88,7 @@
           </v-col>
           <v-col class="text-right">
               <v-btn color="blue" dark @click="generateReport" :loading="loading">Generate</v-btn>
+              <v-btn color="green" dark @click="printReport" :loading="loading" class="ml-5">Print</v-btn>
           </v-col>
       </v-row>
       <div v-show="this.reports.payments != null && this.reports.purchased_products != null">
@@ -174,6 +175,7 @@
 
 <script>
   import moment from 'moment'
+  import { IpcRenderer, ipcRenderer } from 'electron'
   import { mapState, mapActions } from 'vuex'
   export default {
     data:() => ({
@@ -240,6 +242,9 @@
             }
 
             this.generateReports(data)
+        },
+        printReport(){
+          ipcRenderer.send('print')
         }
     }
   }

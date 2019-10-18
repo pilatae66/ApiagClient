@@ -20,7 +20,7 @@
                         hide-no-data
                         >
                         <template v-slot:selection="data">
-                            ID: {{ data.item.id }} / Name: {{ data.item.name }} / Address: {{ data.item.address.permanent_address }}
+                            ID: {{ data.item.id }} / Name: {{ data.item.full_name }} / Address: {{ data.item.address.permanent_address }}
                         </template>
                         <template v-slot:item="data">
                             <template v-if="typeof data.item !== 'object'">
@@ -33,7 +33,7 @@
                                         <v-list-item-title v-text="`Customer ID: ${data.item.id}`"></v-list-item-title>
                                     </v-col>
                                     <v-col>
-                                        <v-list-item-title v-text="`Name: ${data.item.name}`"></v-list-item-title>
+                                        <v-list-item-title v-text="`Name: ${data.item.full_name}`"></v-list-item-title>
                                     </v-col>
                                     <v-col>
                                         <v-list-item-title v-text="`Address : ${data.item.address.permanent_address}`"></v-list-item-title>
@@ -63,10 +63,10 @@
                 <span class="title font-weight-light">Payment Information</span>
                 <v-row>
                     <v-col>
-                        Monthly Amortization: {{ customer_purchase != null ? `₱ ${customer_purchase.monthly_amortization}` : ''}}
+                        Monthly Amortization: {{ customer_purchase != null ? `₱ ${monthly_amortization}` : ''}}
                     </v-col>
                     <v-col>
-                        Amount Due: {{ customer_purchase != null ? `₱ ${customer_purchase.amount_due}` : ''}}
+                        Amount Due: {{ customer_purchase != null ? `₱ ${amount_due}` : ''}}
                     </v-col>
                     <v-col>
                         Total Amount Paid: {{ customer_purchase != null ? `₱ ${customer_purchase.total_payment}` : ''}}
@@ -121,7 +121,9 @@ export default {
         late:false,
         five_percent: null,
         penalty: 0,
-        penaltyType:""
+        penaltyType:"",
+        monthly_amortization: 0,
+        amount_due: 0
     }),
     created(){
         this.getCustomersWithPurchase()
@@ -168,7 +170,7 @@ export default {
                 product_id: this.customer_purchase.id,
                 amount_due: this.customer_purchase.amount_due - this.amount,
                 pay:{
-                    amount: this.amount,
+                    amount: Number(this.amount) + Number(this.penalty),
                     payment_type: 'Branch',
                     paid_to: this.auth_user.id,
                     remarks: remarks,
@@ -187,33 +189,35 @@ export default {
         },
         customer_purchase(newValue, oldValue){
             if (newValue != oldValue) {
-                this.five_percent = this.customer_purchase.monthly_amortization * 0.05
+                this.five_percent = Number(this.customer_purchase.monthly_amortization.replace(/[^0-9.-]+/g,"")) * 0.05
+                this.monthly_amortization = Number(this.customer_purchase.monthly_amortization.replace(/[^0-9.-]+/g,""))
+                this.amount_due = Number(this.customer_purchase.amount_due.replace(/[^0-9.-]+/g,""))
             }
         },
         early(newValue, oldValue){
             if (newValue == true) {
-                this.customer_purchase.monthly_amortization -= 200
-                this.customer_purchase.amount_due -= 200
+                this.monthly_amortization -= 200
+                this.amount_due -= 200
                 this.penalty = 200
                 this.penaltyType = "Rebates"
             }
             else{
-                this.customer_purchase.monthly_amortization += 200
-                this.customer_purchase.amount_due += 200
+                this.monthly_amortization += 200
+                this.amount_due += 200
                 this.penalty = 0
                 this.penaltyType = ""
             }
         },
         late(newValue, oldValue){
             if (newValue == true) {
-                this.customer_purchase.monthly_amortization += this.five_percent
-                this.customer_purchase.amount_due += this.five_percent
+                this.monthly_amortization += this.five_percent
+                this.amount_due += this.five_percent
                 this.penalty = this.five_percent
                 this.penaltyType = "Penalty"
             }
             else{
-                this.customer_purchase.monthly_amortization -= this.five_percent
-                this.customer_purchase.amount_due -= this.five_percent
+                this.monthly_amortization -= this.five_percent
+                this.amount_due -= this.five_percent
                 this.penalty = 0
                 this.penaltyType = ""
             }
